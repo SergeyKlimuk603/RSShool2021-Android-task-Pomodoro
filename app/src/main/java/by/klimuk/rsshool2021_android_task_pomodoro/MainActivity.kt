@@ -1,24 +1,25 @@
 package by.klimuk.rsshool2021_android_task_pomodoro
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.Gravity
+import android.view.inputmethod.InputMethodManager
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import by.klimuk.rsshool2021_android_task_pomodoro.adapters.TimerAdapter
 import by.klimuk.rsshool2021_android_task_pomodoro.databinding.ActivityMainBinding
 import by.klimuk.rsshool2021_android_task_pomodoro.interfaces.TimerListener
-import by.klimuk.rsshool2021_android_task_pomodoro.models.Metronome
 import by.klimuk.rsshool2021_android_task_pomodoro.models.Timer
 
-class MainActivity : AppCompatActivity(), Metronome.CallBack,
-    TimerListener, Timer.TimerListener {
+
+class MainActivity : AppCompatActivity(), TimerListener, Timer.TimerListener {
 
     private lateinit var binding: ActivityMainBinding
 
     private val timerAdapter = TimerAdapter(this)
     private val timers = mutableListOf<Timer>()
     private var nextId = 0
-    private val metronome = Metronome(this, TIMER_CHECK_PERIOD)
     private var runningTimer: Timer? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,49 +33,53 @@ class MainActivity : AppCompatActivity(), Metronome.CallBack,
         }
 
         binding.btnAddTimer.setOnClickListener {
-            timers.add(Timer(this, nextId++, 60 * 1000))
-            timerAdapter.submitList(timers.toList())
+            val timerSet = binding.etEnterTime.text.toString().toIntOrNull() ?: -1
+            if (timerSet in 1..5999) {
+                timers.add(Timer(this, nextId++, timerSet * 60000L))
+                timerAdapter.submitList(timers.toList())
+                val imm: InputMethodManager =
+                    getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.hideSoftInputFromWindow(binding.root.windowToken, 0);
+            } else {
+                val toast = Toast.makeText(this,
+                    "Значение уставки должно быть в пределах от 1 до 5999 минут",
+                    Toast.LENGTH_LONG)
+                toast.setGravity(Gravity.CENTER, 0 , 0)
+                toast.show()
+            }
         }
     }
 
     // Переопределенные функции интерфейсов
-    override fun tick() {
-        //Log.d("TAG", "MainActivity tick()---------------")
-        if (runningTimer != null) {
-            runningTimer?.updateTime(System.currentTimeMillis())
-        }
-    }
-
-    override fun finish(timer: Timer) {
-        TODO("Закончилось время таймера")
-    }
-
     override fun updateTime(timer: Timer) {
         Log.d("TAG", "MainActivity updateTime()---------------")
         timerAdapter.notifyDataSetChanged()
+    }
+    override fun finish(timer: Timer) {
+        val toast = Toast.makeText(this,
+            "Время вышло!!!",
+            Toast.LENGTH_LONG)
+        toast.setGravity(Gravity.CENTER, 0 , 0)
+        toast.show()
+        Log.d("TAG", "MainActivity finish()---------------")
+
     }
 
     override fun start(timer: Timer) {
         Log.d("TAG", "MainActivity start() startTimerId = ${timer.id}")
         if (runningTimer != null) {
-            runningTimer?.stop(System.currentTimeMillis())
+            runningTimer?.stop()
         }
         runningTimer = timer
-        metronome.start()
-        timer.start(System.currentTimeMillis())
-        updateTime(timer)
+        timer.start()
     }
 
     override fun stop(timer: Timer) {
         Log.d("TAG", "MainActivity stop()")
-        metronome.stop()
-        timer.stop(System.currentTimeMillis())
+        timer.stop()
     }
 
     override fun delete(timer: Timer) {
-        if (timer.isRunning) {
-            metronome.stop()
-        }
         timers.remove(timer)
         timerAdapter.submitList(timers.toList())
     }
