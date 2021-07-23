@@ -10,6 +10,7 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import by.klimuk.rsshool2021_android_task_pomodoro.R
 import by.klimuk.rsshool2021_android_task_pomodoro.databinding.TimerItemBinding
+import by.klimuk.rsshool2021_android_task_pomodoro.displayTime
 import by.klimuk.rsshool2021_android_task_pomodoro.interfaces.TimerListener
 import by.klimuk.rsshool2021_android_task_pomodoro.models.Timer
 
@@ -27,7 +28,7 @@ class TimerViewHolder(
 
     fun bind(timer: Timer) {
 
-        binding.tvLeftTime.text = (timer.timeLeft / 1000).toInt().displayTime()
+        binding.tvLeftTime.text = (timer.timeLeft / 1000).displayTime()
         val angle = TWO_PI * (timer.timeLeft / 1000) / (timer.setTime / 1000)
         binding.timerView.setAngle(angle)
         initButtonListener(timer)
@@ -42,7 +43,7 @@ class TimerViewHolder(
 
         val typeValue = TypedValue()
         val timerBackgroundId = if (timer.timeLeft == 0L) {
-            binding.tvLeftTime.text = (timer.setTime / 1000).toInt().displayTime()
+            binding.tvLeftTime.text = (timer.setTime / 1000).displayTime()
             R.attr.colorPrimaryVariant
         } else {
             R.attr.colorBackgroundFloating
@@ -63,22 +64,12 @@ class TimerViewHolder(
         }
         binding.btnStart.setOnClickListener() {
             if (timer.isRunning) {
-                //timer.isRunning = false
                 binding.btnStart.text = "Start"
                 timerListener.stop(timer)
             } else {
-                //timer.isRunning = true
                 binding.btnStart.text = "Stop"
                 timerListener.start(timer)
             }
         }
-    }
-
-    // Функция преобразует время в удобный для человека формат
-    private fun Int.displayTime(): String {
-        val h = this / 3600
-        val m = this % 3600 / 60
-        val s = this % 60
-        return String.format("%02d:%02d:%02d", h, m, s);
     }
 }

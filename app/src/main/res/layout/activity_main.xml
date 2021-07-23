@@ -21,6 +21,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:hint="@string/hint_minutes"
+        android:gravity="center"
         android:inputType="number"
         app:layout_constraintTop_toTopOf="@id/btn_add_timer"
         app:layout_constraintStart_toStartOf="parent"

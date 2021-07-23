@@ -36,7 +36,7 @@ data class Timer(
             val delta = System.currentTimeMillis() - this.lastStartSystemTime
             timeLeft = lastStartTimeLeft - delta
             if (oldTime != timeLeft / 1000) {
-                Log.d("TAG", "timeLeft = $timeLeft")
+                //Log.d("TAG", "timeLeft = $timeLeft")
                 timerListener.updateTime(this)
             }
             if (timeLeft <= 0) {
